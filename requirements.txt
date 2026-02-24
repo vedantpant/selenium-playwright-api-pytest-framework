@@ -1,0 +1,9 @@
+pytest
+pytest-xdist
+pytest-html
+pytest-metadata
+pytest-base-url
+selenium
+playwright
+pytest-playwright
+requests
