@@ -25,17 +25,40 @@ def base_url(pytestconfig):
 # ---------------------------
 
 @pytest.fixture
-def driver():
-    options = Options()
-    options.add_argument("--start-maximized")
-    drv = webdriver.Chrome(options=options)
+def driver(ui_browser, ui_headless):
+    if ui_browser == "chrome":
+        options = Options()
+        if ui_headless:
+            options.add_argument("--headless=new")
+        options.add_argument("--start-maximized")
+        drv = webdriver.Chrome(options=options)
+
+    elif ui_browser == "firefox":
+        from selenium.webdriver.firefox.options import Options as FFOptions
+        options = FFOptions()
+        if ui_headless:
+            options.add_argument("--headless")
+        drv = webdriver.Firefox(options=options)
+        drv.maximize_window()
+
+    elif ui_browser == "edge":
+        from selenium.webdriver.edge.options import Options as EdgeOptions
+        options = EdgeOptions()
+        if ui_headless:
+            options.add_argument("--headless=new")
+        drv = webdriver.Edge(options=options)
+        drv.maximize_window()
+
+    else:
+        raise ValueError(f"Unsupported ui browser: {ui_browser}")
+
     yield drv
     drv.quit()
 
 
 @pytest.fixture
-def wait(driver):
-    return WebDriverWait(driver, 10)
+def wait(driver, ui_timeout):
+    return WebDriverWait(driver, ui_timeout)
 
 
 # ---------------------------
@@ -119,3 +142,39 @@ def api_client(api_base_url):
     s.base_url = api_base_url
     yield s
     s.close()
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--ui-browser",
+        action="store",
+        default="chrome",
+        help="UI browser for Selenium: chrome|firefox|edge",
+    )
+    parser.addoption(
+        "--ui-headless",
+        action="store_true",
+        default=False,
+        help="Run Selenium in headless mode",
+    )
+    parser.addoption(
+        "--ui-timeout",
+        action="store",
+        type=int,
+        default=10,
+        help="Default Selenium explicit wait timeout (seconds)",
+    )
+
+@pytest.fixture(scope="session")
+def ui_browser(pytestconfig):
+    return pytestconfig.getoption("--ui-browser").lower()
+
+
+@pytest.fixture(scope="session")
+def ui_headless(pytestconfig):
+    return pytestconfig.getoption("--ui-headless")
+
+
+@pytest.fixture(scope="session")
+def ui_timeout(pytestconfig):
+    return int(pytestconfig.getoption("--ui-timeout"))
