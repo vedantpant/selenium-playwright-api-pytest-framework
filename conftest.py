@@ -97,8 +97,16 @@ def pytest_runtest_makereport(item, call):
         if drv:
             os.makedirs("reports/screenshots", exist_ok=True)
             ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-            name = f"{item.name}_{ts}.png".replace("/", "_").replace("\\", "_")
-            path = os.path.join("reports/screenshots", name)
+
+            # selenium-specific metadata (from our CLI fixtures)
+            browser = item.funcargs.get("ui_browser", "unknown")
+            headless = "headless" if item.funcargs.get("ui_headless", False) else "headed"
+
+            # nodeid = tests/test_file.py::test_name[param]
+            safe_nodeid = item.nodeid.replace("::", "__").replace("/", "_").replace("\\", "_")
+            file_name = f"{safe_nodeid}__{browser}__{headless}__{ts}.png"
+
+            path = os.path.join("reports/screenshots", file_name)
             drv.save_screenshot(path)
 
 
