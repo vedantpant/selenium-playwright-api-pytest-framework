@@ -8,6 +8,7 @@ import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
+from core.driverfactory import DriverFactory
 
 
 # ---------------------------
@@ -26,32 +27,7 @@ def base_url(pytestconfig):
 
 @pytest.fixture
 def driver(ui_browser, ui_headless):
-    if ui_browser == "chrome":
-        options = Options()
-        if ui_headless:
-            options.add_argument("--headless=new")
-        options.add_argument("--start-maximized")
-        drv = webdriver.Chrome(options=options)
-
-    elif ui_browser == "firefox":
-        from selenium.webdriver.firefox.options import Options as FFOptions
-        options = FFOptions()
-        if ui_headless:
-            options.add_argument("--headless")
-        drv = webdriver.Firefox(options=options)
-        drv.maximize_window()
-
-    elif ui_browser == "edge":
-        from selenium.webdriver.edge.options import Options as EdgeOptions
-        options = EdgeOptions()
-        if ui_headless:
-            options.add_argument("--headless=new")
-        drv = webdriver.Edge(options=options)
-        drv.maximize_window()
-
-    else:
-        raise ValueError(f"Unsupported ui browser: {ui_browser}")
-
+    drv = DriverFactory.create_driver(ui_browser, ui_headless)
     yield drv
     drv.quit()
 

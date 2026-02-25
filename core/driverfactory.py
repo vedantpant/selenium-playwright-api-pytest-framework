@@ -1,21 +1,38 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from core.config import Config
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+
 
 class DriverFactory:
-
     @staticmethod
-    def create_driver():
-        if Config.BROWSER == 'chrome':
-            options = Options()
+    def create_driver(browser: str= "chrome", headless: bool = False):
+        browser = browser.lower()
 
-            if Config.HEADLESS:
-                options.add_argument('--headless=new')
-
+        if browser == "chrome":
+            options = ChromeOptions()
+            if headless:
+                options.add_argument("--headless=new")
             options.add_argument("--start-maximized")
+            return webdriver.Chrome(options=options)
 
-            driver =webdriver.Chrome(options=options)
-            driver.implicitly_wait(0)
-            return driver
+        if browser == "firefox":
+            from selenium.webdriver.firefox.options import Options as FFOptions
 
-        raise Exception(f"Unsupported browser: {Config.BROWSER}")
+            options = FFOptions()
+            if headless:
+                options.add_argument("--headless")
+            drv = webdriver.Firefox(options=options)
+            drv.maximize_window()
+            return drv
+
+        if browser == "edge":
+            from selenium.webdriver.edge.options import Options as EdgeOptions
+
+            options = EdgeOptions()
+            if headless:
+                options.add_argument("--headless=new")
+                drv = webdriver.Edge(options=options)
+                drv.maximize_window()
+                return drv
+
+        raise ValueError(f"Unsupported browser: {browser}")
+
