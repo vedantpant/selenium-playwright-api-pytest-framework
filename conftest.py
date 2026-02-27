@@ -109,6 +109,21 @@ def pytest_runtest_makereport(item, call):
             path = os.path.join("reports/screenshots", file_name)
             drv.save_screenshot(path)
 
+            artifacts_dir = os.path.join("reports", "artifacts", safe_nodeid)
+            os.makedirs(artifacts_dir, exist_ok=True)
+
+            try:
+                with open(os.path.join(artifacts_dir, "url.txt"), "w", encoding="utf-8") as f:
+                    f.write(drv.current_url)
+            except Exception:
+                pass
+
+            try:
+                with open(os.path.join(artifacts_dir, "page_source.html"), "w", encoding="utf-8") as f:
+                    f.write(drv.page_source)
+            except Exception:
+                pass
+
 
 # ---------------------------
 # API fixtures (so test run stays green)
