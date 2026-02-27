@@ -129,7 +129,8 @@ def pytest_runtest_makereport(item, call):
                 if logs:
                     with open(os.path.join(artifacts_dir, "browser_console.log"), "w", encoding="utf-8") as f:
                         for entry in logs:
-                            f.write(f"{entry.get('level')} | {entry.get('timestamp')} | {entry.get({"timestamp"})} | {entry.get('message')}\n")
+                            f.write(f"{entry.get('level')} | {entry.get('timestamp')} | {entry.get('message')}\n"
+                                    )
             except Exception:
                 pass
 
