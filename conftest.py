@@ -21,6 +21,10 @@ def base_url(pytestconfig):
     return pytestconfig.getoption("base_url")
 
 
+@pytest.fixture(scope="session")
+def run_id():
+    return datetime.now().strftime("%Y%m%d_%H%M%S")
+
 # ---------------------------
 # Selenium driver fixtures
 # ---------------------------
@@ -94,45 +98,58 @@ def pytest_runtest_makereport(item, call):
 
     if rep.when == "call" and rep.failed:
         drv = item.funcargs.get("driver", None)
-        if drv:
-            os.makedirs("reports/screenshots", exist_ok=True)
-            ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        if not drv:
+            return
 
-            # selenium-specific metadata (from our CLI fixtures)
-            browser = item.funcargs.get("ui_browser", "unknown")
-            headless = "headless" if item.funcargs.get("ui_headless", False) else "headed"
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-            # nodeid = tests/test_file.py::test_name[param]
-            safe_nodeid = item.nodeid.replace("::", "__").replace("/", "_").replace("\\", "_")
-            file_name = f"{safe_nodeid}__{browser}__{headless}__{ts}.png"
+        browser = item.funcargs.get("ui_browser", "unknown")
+        headless = "headless" if item.funcargs.get("ui_headless", False) else "headed"
+        safe_nodeid = item.nodeid.replace("::", "__").replace("/", "_").replace("\\", "_")
 
-            path = os.path.join("reports/screenshots", file_name)
-            drv.save_screenshot(path)
+        run_id_val = item.funcargs.get("run_id", "run")
+        screenshots_dir = os.path.join("reports", "runs", run_id_val, "screenshots")
+        artifacts_dir = os.path.join("reports", "runs", run_id_val, "artifacts", safe_nodeid)
 
-            artifacts_dir = os.path.join("reports", "artifacts", safe_nodeid)
-            os.makedirs(artifacts_dir, exist_ok=True)
+        # ✅ CREATE DIRECTORIES
+        os.makedirs(screenshots_dir, exist_ok=True)
+        os.makedirs(artifacts_dir, exist_ok=True)
 
-            try:
-                with open(os.path.join(artifacts_dir, "url.txt"), "w", encoding="utf-8") as f:
-                    f.write(drv.current_url)
-            except Exception:
-                pass
+        # ✅ SCREENSHOT
+        screenshot_path = os.path.join(
+            screenshots_dir,
+            f"{safe_nodeid}__{browser}__{headless}__{ts}.png",
+        )
+        try:
+            drv.save_screenshot(screenshot_path)
+        except Exception:
+            pass
 
-            try:
-                with open(os.path.join(artifacts_dir, "page_source.html"), "w", encoding="utf-8") as f:
-                    f.write(drv.page_source)
-            except Exception:
-                pass
+        # URL
+        try:
+            with open(os.path.join(artifacts_dir, "url.txt"), "w", encoding="utf-8") as f:
+                f.write(drv.current_url)
+        except Exception:
+            pass
 
-            try:
-                logs=drv.get_log("browser")
-                if logs:
-                    with open(os.path.join(artifacts_dir, "browser_console.log"), "w", encoding="utf-8") as f:
-                        for entry in logs:
-                            f.write(f"{entry.get('level')} | {entry.get('timestamp')} | {entry.get('message')}\n"
-                                    )
-            except Exception:
-                pass
+        # Page source
+        try:
+            with open(os.path.join(artifacts_dir, "page_source.html"), "w", encoding="utf-8") as f:
+                f.write(drv.page_source)
+        except Exception:
+            pass
+
+        # Browser console logs
+        try:
+            logs = drv.get_log("browser")
+            if logs:
+                with open(os.path.join(artifacts_dir, "browser_console.log"), "w", encoding="utf-8") as f:
+                    for entry in logs:
+                        f.write(
+                            f"{entry.get('level')} | {entry.get('timestamp')} | {entry.get('message')}\n"
+                        )
+        except Exception:
+            pass
 
 
 # ---------------------------
