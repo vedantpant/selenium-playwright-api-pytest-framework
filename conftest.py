@@ -124,6 +124,15 @@ def pytest_runtest_makereport(item, call):
             except Exception:
                 pass
 
+            try:
+                logs=drv.get_log("browser")
+                if logs:
+                    with open(os.path.join(artifacts_dir, "browser_console.log"), "w", encoding="utf-8") as f:
+                        for entry in logs:
+                            f.write(f"{entry.get('level')} | {entry.get('timestamp')} | {entry.get({"timestamp"})} | {entry.get('message')}\n")
+            except Exception:
+                pass
+
 
 # ---------------------------
 # API fixtures (so test run stays green)

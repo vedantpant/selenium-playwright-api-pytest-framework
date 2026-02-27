@@ -12,6 +12,9 @@ class DriverFactory:
             if headless:
                 options.add_argument("--headless=new")
             options.add_argument("--start-maximized")
+
+            options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
+
             return webdriver.Chrome(options=options)
 
         if browser == "firefox":
