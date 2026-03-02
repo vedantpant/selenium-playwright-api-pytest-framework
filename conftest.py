@@ -3,6 +3,8 @@ import os
 import logging
 from datetime import datetime
 
+import allure
+from allure_commons.types import AttachmentType
 import pytest
 import requests
 from selenium import webdriver
@@ -120,34 +122,31 @@ def pytest_runtest_makereport(item, call):
             screenshots_dir,
             f"{safe_nodeid}__{browser}__{headless}__{ts}.png",
         )
+
         try:
-            drv.save_screenshot(screenshot_path)
+            if os.path.exists(screenshot_path):
+                allure.attach.file(screenshot_path, name="screenshot", attachment_type=AttachmentType.PNG)
         except Exception:
             pass
 
-        # URL
         try:
-            with open(os.path.join(artifacts_dir, "url.txt"), "w", encoding="utf-8") as f:
-                f.write(drv.current_url)
+            url_path = os.path.join(artifacts_dir, "url.txt")
+            if os.path.exists(url_path):
+                allure.attach.file(url_path, name="url", attachment_type=AttachmentType.TEXT)
         except Exception:
             pass
 
-        # Page source
         try:
-            with open(os.path.join(artifacts_dir, "page_source.html"), "w", encoding="utf-8") as f:
-                f.write(drv.page_source)
+            html_path = os.path.join(artifacts_dir, "page_source.html")
+            if os.path.exists(html_path):
+                allure.attach.file(html_path, name="page_source", attachment_type=AttachmentType.HTML)
         except Exception:
             pass
 
-        # Browser console logs
         try:
-            logs = drv.get_log("browser")
-            if logs:
-                with open(os.path.join(artifacts_dir, "browser_console.log"), "w", encoding="utf-8") as f:
-                    for entry in logs:
-                        f.write(
-                            f"{entry.get('level')} | {entry.get('timestamp')} | {entry.get('message')}\n"
-                        )
+            console_path = os.path.join(artifacts_dir, "browser_console.log")
+            if os.path.exists(console_path):
+                allure.attach.file(console_path, name="browser_console", attachment_type=AttachmentType.TEXT)
         except Exception:
             pass
 
