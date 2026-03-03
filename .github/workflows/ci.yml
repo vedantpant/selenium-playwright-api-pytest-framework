@@ -1,5 +1,8 @@
 name: CI - Pytest (Selenium)
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: [ "main" ]
@@ -32,20 +35,24 @@ jobs:
         run: |
           pytest -q tests -m "selenium" --ui-browser chrome --ui-headless --ui-timeout 15 --alluredir=allure-results
 
-      - name: Upload allure-results
+      - name: Generate Allure HTML report
+        if: always()
+        run: |
+          npm i -g allure-commandline
+          allure generate allure-results --clean -o allure-report
+
+      - name: Upload allure-report (HTML)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure-results
-          path: allure-results
+          name: allure-report
+          path: allure-report
           if-no-files-found: warn
 
-      - name: Upload run artifacts (screenshots, page source, logs)
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Deploy Allure report to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          name: test-artifacts
-          path: |
-            reports
-            logs
-          if-no-files-found: warn
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: allure-report
+          destination_dir: allure
