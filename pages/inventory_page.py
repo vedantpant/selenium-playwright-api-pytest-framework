@@ -1,5 +1,6 @@
 from selenium.webdriver.common.by import By
 from core.base_page import BasePage
+import allure
 
 class InventoryPage(BasePage):
     _inventory_container = (By.CLASS_NAME, "inventory_list")
@@ -12,5 +13,6 @@ class InventoryPage(BasePage):
     def add_first_item_to_cart(self):
         self.click(self._add_backpack_btn)
 
+    @allure.step("Proceed to checkout")
     def go_to_cart(self):
         self.click(self._cart_link)

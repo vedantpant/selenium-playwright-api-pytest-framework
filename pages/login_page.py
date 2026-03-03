@@ -1,5 +1,6 @@
 from selenium.webdriver.common.by import By
 from core.base_page import BasePage
+import allure
 
 class LoginPage(BasePage):
 
@@ -15,6 +16,7 @@ class LoginPage(BasePage):
         assert base_url, "base_url is empty/None. Set it in pytest.ini or pass --base-url"
         self.driver.get(base_url)
 
+    @allure.step("Login with username: {username}")
     def login(self, username, password):
         self.type(self._username, username)
         self.type(self._password, password)
