@@ -20,6 +20,7 @@ class InventoryPage(BasePage):
     def add_first_item_to_cart(self):
         self.click(self._add_backpack_btn)
 
-    @allure.step("Proceed to checkout")
+    @allure.step("Go to cart")
     def go_to_cart(self):
+        self.wait_for_visible(self._cart_link)
         self.click(self._cart_link)

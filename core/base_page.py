@@ -22,14 +22,14 @@ class BasePage:
     # SAFE CLICK
     # =========================
     def click(self, locator, retries=2):
+        element = self.wait.until(EC.element_to_be_clickable(locator))
         self._log(f"Clicking element: {locator}")
         for attempt in range(retries):
             try:
-                element = self.wait.until(
-                    EC.element_to_be_clickable(locator)
-                )
                 element.click()
                 return
+            except Exception:
+                self.driver.execute_script("argument[0].click();", element)
             except ElementClickInterceptedException:
                 self._log("Click intercepted, trying scroll + retry")
                 self.scroll_into_view(locator)
