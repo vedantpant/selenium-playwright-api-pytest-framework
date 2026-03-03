@@ -8,7 +8,7 @@ class CartPage(BasePage):
     _cart_title = (By.CLASS_NAME, "title")
     _cart_item = (By.CLASS_NAME, "cart_item")
 
-    @allure.step("Add product '{product_name}' to cart")
+    @allure.step("Wait for cart page and cart item")
     def wait_for_cart_item(self):
         self.wait_for_visible(self._cart_title)
         self.wait_for_presence(self._cart_item)

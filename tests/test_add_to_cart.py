@@ -21,11 +21,9 @@ def test_add_to_cart(driver,base_url, logger):
 
     inventory_page.wait_for_inventory()
     inventory_page.add_first_item_to_cart()
+    inventory_page.wait_for_cart_badge(1)
     inventory_page.go_to_cart()
 
-    #cart_page.wait_for_cart_item()
+    cart_page.wait_for_cart_item()
     assert cart_page.has_items()
-    # assert False
-
-    driver.quit()
 
