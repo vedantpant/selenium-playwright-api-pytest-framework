@@ -1,0 +1,5 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","431","test_scroll_into_view","tests.ui_advanced","2026-03-03","passed","2026-03-03","","test_scrolling","",""
+"","653","test_dynamic_add_remove","tests.ui_advanced","2026-03-03","passed","2026-03-03","","test_xpath_relations","",""
+"","393","test_scroll_to_bottom","tests.ui_advanced","2026-03-03","passed","2026-03-03","","test_scrolling","",""
+"","1300","test_add_to_cart","tests","2026-03-03","passed","2026-03-03","","test_add_to_cart","",""
