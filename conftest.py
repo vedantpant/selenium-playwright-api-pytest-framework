@@ -16,26 +16,32 @@ from core.driverfactory import DriverFactory
 # ---------------------------
 # base_url (from pytest-base-url plugin)
 # ---------------------------
-
 @pytest.fixture(scope="session")
 def base_url(pytestconfig):
-    # pytest-base-url plugin provides option "base_url" and CLI flag --base-url
-    return pytestconfig.getoption("base_url")
+    return (
+        pytestconfig.getoption("--base-url")
+        or os.getenv("BASE_URL")
+        or "https://www.saucedemo.com"
+    )
 
 
 @pytest.fixture(scope="session")
 def run_id():
     return datetime.now().strftime("%Y%m%d_%H%M%S")
 
+
 # ---------------------------
 # Selenium driver fixtures
 # ---------------------------
-
 @pytest.fixture
 def driver(ui_browser, ui_headless):
-    drv = DriverFactory.create_driver(ui_browser, ui_headless)
-    yield drv
-    drv.quit()
+    drv = None
+    try:
+        drv = DriverFactory.create_driver(ui_browser, ui_headless)
+        yield drv
+    finally:
+        if drv:
+            drv.quit()
 
 
 @pytest.fixture
@@ -110,8 +116,10 @@ def pytest_runtest_makereport(item, call):
         safe_nodeid = item.nodeid.replace("::", "__").replace("/", "_").replace("\\", "_")
 
         run_id_val = item.funcargs.get("run_id", "run")
-        screenshots_dir = os.path.join("reports", "runs", run_id_val, "screenshots")
-        artifacts_dir = os.path.join("reports", "runs", run_id_val, "artifacts", safe_nodeid)
+        wid = item.funcargs.get("worker_id", "master")
+
+        screenshots_dir = os.path.join("reports", "runs", run_id_val, wid, "screenshots")
+        artifacts_dir = os.path.join("reports", "runs", run_id_val, wid, "artifacts", safe_nodeid)
 
         # ✅ CREATE DIRECTORIES
         os.makedirs(screenshots_dir, exist_ok=True)
