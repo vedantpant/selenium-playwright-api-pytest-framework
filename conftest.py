@@ -116,10 +116,15 @@ def pytest_runtest_makereport(item, call):
         safe_nodeid = item.nodeid.replace("::", "__").replace("/", "_").replace("\\", "_")
 
         run_id_val = item.funcargs.get("run_id", "run")
-        wid = item.funcargs.get("worker_id", "master")
+        worker_id = item.funcargs.get("worker_id", "master")
 
-        screenshots_dir = os.path.join("reports", "runs", run_id_val, wid, "screenshots")
-        artifacts_dir = os.path.join("reports", "runs", run_id_val, wid, "artifacts", safe_nodeid)
+        screenshots_dir = os.path.join("reports", "runs", run_id_val, worker_id, "screenshots")
+        artifacts_dir = os.path.join("reports",
+                                     "runs",
+                                     run_id_val,
+                                     worker_id,
+                                     "artifacts",
+                                     safe_nodeid)
 
         # ✅ CREATE DIRECTORIES
         os.makedirs(screenshots_dir, exist_ok=True)
